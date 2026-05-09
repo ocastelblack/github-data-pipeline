@@ -1,11 +1,10 @@
-version: '3.8'
+version: "3"
 
 services:
-
   postgres:
     image: postgres:15
+
     container_name: github_postgres
-    restart: always
 
     environment:
       POSTGRES_USER: admin
@@ -15,12 +14,61 @@ services:
     ports:
       - "5432:5432"
 
-  app:
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  github_app:
     build: .
+
     container_name: github_app
+
+    env_file:
+      - .env
 
     depends_on:
       - postgres
 
-    env_file:
-      - .env
+    volumes:
+      - ./app:/app
+
+  airflow:
+
+    image: apache/airflow:2.8.1
+
+    container_name: airflow
+
+    depends_on:
+      - postgres
+
+    environment:
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: github_data
+      POSTGRES_HOST: github_postgres
+      POSTGRES_PORT: 5432
+
+    ports:
+      - "8080:8080"
+
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./app:/app
+
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create
+      --username admin
+      --password admin
+      --firstname Oscar
+      --lastname Data
+      --role Admin
+      --email admin@test.com &&
+      airflow webserver &
+      airflow scheduler
+      "
+
+volumes:
+  postgres_data:

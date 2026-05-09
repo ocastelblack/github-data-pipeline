@@ -1,20 +1,16 @@
 from db import wait_for_db, create_tables
 
-from github_client import (
-    get_issues,
-    get_commits
-)
+from generate_report import generate_report
 
-from insert_data import (
-    save_repository,
-    save_issues,
-    save_commits
-)
+from github_client import get_issues, get_commits
 
-from sync_manager import (
-    get_last_sync,
-    update_last_sync
-)
+from insert_data import save_repository, save_issues, save_commits
+
+from sync_manager import get_last_sync, update_last_sync
+
+from drive_config import get_repositories
+
+from upload_drive import upload_file
 
 if __name__ == "__main__":
 
@@ -22,44 +18,40 @@ if __name__ == "__main__":
 
     create_tables()
 
-    repo = "pandas-dev/pandas"
+    repositories = get_repositories()
 
-    print(f"Procesando repo: {repo}")
+    print(f"Repositorios encontrados: {repositories}")
 
-    repo_id = save_repository(repo)
+    for repo in repositories:
 
-    # ISSUES
+        print(f"Procesando repo: {repo}")
 
-    last_issue_sync = get_last_sync(
-        repo,
-        "issues"
-    )
+        repo_id = save_repository(repo)
 
-    issues = get_issues(
-        repo,
-        since=last_issue_sync
-    )
+        # ISSUES
 
-    save_issues(repo_id, issues)
+        last_issue_sync = get_last_sync(repo, "issues")
 
-    update_last_sync(repo, "issues")
+        issues = get_issues(repo, since=last_issue_sync)
 
-    # COMMITS
+        save_issues(repo_id, issues)
 
-    last_commit_sync = get_last_sync(
-        repo,
-        "commits"
-    )
+        update_last_sync(repo, "issues")
 
-    commits = get_commits(
-        repo,
-        since=last_commit_sync
-    )
+        # COMMITS
 
-    save_commits(repo_id, commits)
+        last_commit_sync = get_last_sync(repo, "commits")
 
-    update_last_sync(repo, "commits")
+        commits = get_commits(repo, since=last_commit_sync)
 
-    print(f"Issues procesados: {len(issues)}")
+        save_commits(repo_id, commits)
 
-    print(f"Commits procesados: {len(commits)}")
+        update_last_sync(repo, "commits")
+
+        print(f"Issues procesados: {len(issues)}")
+
+        print(f"Commits procesados: {len(commits)}")
+
+    report_file = generate_report()
+
+    upload_file(report_file)
