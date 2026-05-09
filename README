@@ -1,30 +1,38 @@
 # GitHub Data Pipeline
 
-Pipeline de datos desarrollado en Python para extracción, procesamiento y almacenamiento de información desde GitHub API utilizando Docker, PostgreSQL y Apache Airflow.
+Pipeline ETL desarrollado en Python para extracción, procesamiento y almacenamiento de información desde GitHub API utilizando Docker, PostgreSQL y Apache Airflow.
 
 ---
 
-## Descripción
+# Descripción
 
-Este proyecto implementa un pipeline ETL automatizado capaz de:
+Este proyecto implementa un pipeline automatizado capaz de:
 
-- Extraer información de repositorios públicos desde GitHub API
-- Procesar issues y commits
-- Almacenar la información en PostgreSQL
-- Generar reportes CSV automáticos
-- Ejecutar procesos programados mediante Apache Airflow
-- Leer dinámicamente repositorios desde Google Sheets
+- Extraer información desde GitHub API
+- Procesar issues y commits de múltiples repositorios
+- Almacenar información en PostgreSQL
+- Generar reportes CSV automáticamente
+- Orquestar procesos mediante Apache Airflow
+- Leer repositorios dinámicamente desde Google Sheets
 - Integrarse opcionalmente con Google Drive
 
-El sistema fue diseñado siguiendo buenas prácticas de contenedorización, automatización y manejo de errores.
+El sistema fue diseñado utilizando buenas prácticas de:
+
+- Contenedorización
+- Automatización
+- Manejo de errores
+- Arquitectura modular
+- Variables de entorno
+- Persistencia incremental
 
 ---
 
-## Tecnologías utilizadas
+# Tecnologías utilizadas
 
 - Python 3.11
 - PostgreSQL 15
-- Docker & Docker Compose
+- Docker
+- Docker Compose
 - Apache Airflow 2.8
 - SQLAlchemy
 - Pandas
@@ -34,7 +42,7 @@ El sistema fue diseñado siguiendo buenas prácticas de contenedorización, auto
 
 ---
 
-## Arquitectura
+# Arquitectura
 
 ```text
                 +------------------+
@@ -61,11 +69,11 @@ El sistema fue diseñado siguiendo buenas prácticas de contenedorización, auto
 
                     Apache Airflow
                (Orquestación del Pipeline)
-
 ```
+
 ## Funcionalidades
-Extracción automática de issues desde GitHub
 Extracción automática de commits desde GitHub
+Extracción automática de issues desde GitHub
 Persistencia de datos en PostgreSQL
 Procesamiento incremental para evitar duplicados
 Generación automática de reportes CSV
@@ -76,31 +84,31 @@ Arquitectura desacoplada y modular
 Contenedorización completa con Docker
 
 ## Estructura del proyecto
-project/
+github-data-pipeline/
 │
 ├── app/
 │   ├── main.py
+    ├── credentials.json
 │   ├── db.py
 │   ├── github_api.py
+│   ├── report.py
 │   ├── upload_drive.py
 │   ├── drive_config.py
-│   ├── report.py
 │   └── models.py
 │
 ├── dags/
 │   └── github_pipeline_dag.py
 │
-├── credentials.json
-├── .env
 ├── Dockerfile
 ├── docker-compose.yml
 ├── requirements.txt
+├── .env.example
 ├── .gitignore
 └── README.md
----
-## Variables de entorno
 
-Crear archivo .env
+## Configuración de variables de entorno
+
+Crear un archivo .env en la raíz del proyecto:
 
 POSTGRES_USER=admin
 POSTGRES_PASSWORD=admin
@@ -110,41 +118,32 @@ POSTGRES_PORT=5432
 
 GITHUB_TOKEN=your_github_token
 
----
 ## Instalación y ejecución
 1. Clonar repositorio
-git clone (https://github.com/ocastelblack/github-data-pipeline)
+git clone https://github.com/ocastelblack/github-data-pipeline.git
 
 cd github-data-pipeline
-## Crear archivo .env
+2. Configurar variables de entorno
 
-Configurar variables de entorno necesarias.
+Crear archivo .env basado en .env.example.
 
 3. Construir y ejecutar contenedores
 docker compose up --build
-Verificación PostgreSQL
-
-## Ingresar al contenedor:
-
+PostgreSQL
+Acceder al contenedor
 docker exec -it github_postgres psql -U admin -d github_data
-
-## Consultar tablas:
-
+Verificar tablas
 \dt
-
-##  Consultar datos:
-
+Consultar información
 SELECT * FROM repositories;
 
 SELECT COUNT(*) FROM issues;
 
 SELECT COUNT(*) FROM commits;
 Apache Airflow
-
-Acceder desde navegador:
-
+Acceso web
 http://localhost:8080
-## Credenciales
+Credenciales
 
 Usuario:
 
@@ -157,10 +156,10 @@ Ejecución del DAG
 
 El DAG github_data_pipeline ejecuta automáticamente:
 
-Lectura de repositorios
-Extracción de datos GitHub
-Persistencia PostgreSQL
-Generación reporte CSV
+Lectura dinámica de repositorios
+Extracción de información desde GitHub API
+Persistencia en PostgreSQL
+Generación de reporte CSV
 Subida opcional a Google Drive
 Configuración dinámica de repositorios
 
@@ -186,28 +185,76 @@ Ejemplo:
 repository	total_issues	total_commits
 pandas-dev/pandas	30	30
 microsoft/vscode	30	30
-Google Drive
+ocastelblack/github-data-pipeline	0	2
 
-La integración con Google Drive fue implementada mediante Service Account.
+## Integración con Google Drive
 
-Configuración requerida
-Crear Service Account en Google Cloud
-Descargar credentials.json
-Colocar archivo en la raíz del proyecto
-Compartir carpeta de Google Drive con el Service Account
+La integración con Google Drive fue implementada utilizando Service Accounts de Google Cloud.
+
+Configuración Google Drive
+Pasos requeridos
+1. Crear un proyecto en Google Cloud
+
+Habilitar:
+
+Google Drive API
+Google Sheets API
+2. Crear Service Account
+
+Desde Google Cloud:
+
+IAM & Admin
+Service Accounts
+3. Descargar credenciales
+
+Descargar el archivo:
+
+credentials.json
+4. Colocar archivo en la raíz del proyecto
+
+Ejemplo:
+
+github-data-pipeline/
+│
+├── credentials.json
+5. Compartir carpeta Google Drive
+
+Compartir la carpeta de Google Drive con el email del Service Account.
+
+Ejemplo:
+
+my-service-account@project-id.iam.gserviceaccount.com
+
+Debe tener permisos de:
+
+Editor
+##  Sobre FOLDER_ID
+
+El proyecto utiliza un identificador de carpeta similar a:
+
+FOLDER_ID = '1_U75_PTY7Qs3RJqxKFTeyGpswQhLbGEW'
+
+Este valor:
+
+NO es una credencial
+NO representa un secreto
+Solo identifica la carpeta destino en Google Drive
+
+Por lo tanto puede mantenerse en el código sin problemas de seguridad.
+
 Nota importante sobre Google Drive
 
-Google actualmente restringe almacenamiento para Service Accounts personales.
+Google actualmente restringe cuotas de almacenamiento para algunos Service Accounts personales.
 
 Por esta razón:
 
 El pipeline continúa funcionando correctamente
 El CSV se genera localmente
-El sistema maneja excepciones sin detener el proceso
+El sistema maneja excepciones sin detener el pipeline
 
-Esto garantiza resiliencia y continuidad del pipeline incluso ante fallos externos.
+Esto garantiza resiliencia y continuidad incluso ante fallos externos.
 
-Manejo de errores
+## Manejo de errores
 
 El proyecto implementa:
 
@@ -216,24 +263,29 @@ Validación de conexiones
 Manejo de excepciones API
 Persistencia incremental
 Continuidad del pipeline ante errores externos
-Ejemplo flujo ETL
-Extract:
+Flujo ETL
+Extract
 GitHub API
-
-Transform:
+Google Sheets API
+Transform
 Procesamiento de commits/issues
 Eliminación de duplicados
 Agregaciones
-
-Load:
+Load
 PostgreSQL
 CSV Report
 Google Drive (opcional)
+Seguridad
+
+Archivos sensibles fueron excluidos mediante .gitignore:
+
+.env
+credentials.json
+
+El archivo credentials.json NO se incluye en el repositorio por motivos de seguridad.
 
 ## Autor
-
 Oscar Castelblanco
-
 Python Developer
 Odoo Developer
 Data Engineering Enthusiast
