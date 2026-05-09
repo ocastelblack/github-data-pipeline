@@ -54,4 +54,9 @@ if __name__ == "__main__":
 
     report_file = generate_report()
 
-    upload_file(report_file)
+    try:
+        upload_file(report_file)
+    except Exception as e:
+        print(f"Error subiendo archivo: {e}")
+
+    print("Pipeline finalizado correctamente")
