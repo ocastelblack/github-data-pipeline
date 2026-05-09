@@ -97,14 +97,28 @@ project/
 ├── requirements.txt
 ├── .gitignore
 └── README.md
+---
+## Variables de entorno
 
+Crear archivo .env
+
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+POSTGRES_DB=github_data
+POSTGRES_HOST=github_postgres
+POSTGRES_PORT=5432
+
+GITHUB_TOKEN=your_github_token
+
+---
 ## Instalación y ejecución
 1. Clonar repositorio
-git clone <repository_url>
-cd github-data-pipeline
-2. Crear archivo .env
+git clone (https://github.com/ocastelblack/github-data-pipeline)
 
-## Configurar variables de entorno necesarias.
+cd github-data-pipeline
+## Crear archivo .env
+
+Configurar variables de entorno necesarias.
 
 3. Construir y ejecutar contenedores
 docker compose up --build
@@ -114,11 +128,11 @@ Verificación PostgreSQL
 
 docker exec -it github_postgres psql -U admin -d github_data
 
-Consultar tablas:
+## Consultar tablas:
 
 \dt
 
-Consultar datos:
+##  Consultar datos:
 
 SELECT * FROM repositories;
 
@@ -130,7 +144,7 @@ Apache Airflow
 Acceder desde navegador:
 
 http://localhost:8080
-Credenciales
+## Credenciales
 
 Usuario:
 
